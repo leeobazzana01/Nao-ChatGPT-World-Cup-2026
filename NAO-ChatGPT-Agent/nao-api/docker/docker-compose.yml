@@ -1,0 +1,102 @@
+version: "3.9"
+
+#NAO API docker compose
+#
+#basic usage:
+#docker-compose up --build
+#with nginx (port 80) use:
+#docker-compose --profile nginx up --build
+
+services:
+
+  #main API
+  nao-api:
+    build:
+      context: ..          # project root
+      dockerfile: docker/Dockerfile
+    container_name: nao-api
+    restart: unless-stopped
+
+    ports:
+      - "${PORT:-8080}:8080"
+
+    environment:
+      #openai
+      - OPENAI_API_KEY=${OPENAI_API_KEY:?Set OPENAI_API_KEY in .env}
+      - OPENAI_CHAT_MODEL=${OPENAI_CHAT_MODEL:-gpt-4o}
+      - OPENAI_WHISPER_MODEL=${OPENAI_WHISPER_MODEL:-whisper-1}
+      - OPENAI_TIMEOUT=${OPENAI_TIMEOUT:-60}
+      #server
+      - HOST=0.0.0.0
+      - PORT=8080
+      #authentication
+      - AUTH_TOKEN=${AUTH_TOKEN:-change-this-auth-token}
+      #sessions
+      - SESSION_TTL_SECONDS=${SESSION_TTL_SECONDS:-3600}
+      - SESSION_MAX_HISTORY=${SESSION_MAX_HISTORY:-30}
+      #rag
+      - KNOWLEDGE_DIR=/app/data/knowledge
+      - RAG_TOP_K=${RAG_TOP_K:-5}
+      - RAG_CHUNK_SIZE=${RAG_CHUNK_SIZE:-800}
+      #rate limiting 
+      - RATE_LIMIT_PER_IP=${RATE_LIMIT_PER_IP:-30}
+      - RATE_LIMIT_PER_SESSION=${RATE_LIMIT_PER_SESSION:-20}
+      #loggin
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - LOG_DIR=/app/logs
+
+    volumes:
+      #data persisted acrodd restart
+      - nao_sessions:/app/data/sessions
+      - nao_knowledge:/app/data/knowledge
+      - nao_logs:/app/logs
+
+    healthcheck:
+      test: ["CMD", "python3", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:8080/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+    #resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 512M
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+  #nginx (optional reverse proxy)
+  #adds TLS, gzip compression, and HTTP-level rate limiting
+  nginx:
+    image: nginx:alpine
+    container_name: nao-nginx
+    profiles: ["nginx"]
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      nao-api:
+        condition: service_healthy
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+
+volumes:
+  nao_sessions:
+    driver: local
+  nao_knowledge:
+    driver: local
+  nao_logs:
+    driver: local

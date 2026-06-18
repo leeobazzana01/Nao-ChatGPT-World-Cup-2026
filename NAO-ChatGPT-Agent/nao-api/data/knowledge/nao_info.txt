@@ -1,0 +1,40 @@
+# Knowledge Base — NAO Robot
+
+## About the Robot
+
+The NAO robot is a humanoid developed by SoftBank Robotics.
+It is 58 cm tall and weighs approximately 5.4 kg.
+NAO has 25 degrees of freedom, allowing natural gestures and movements.
+
+## Capabilities
+
+NAO can speak in more than 20 different languages.
+It has HD cameras for computer vision and facial recognition.
+The robot has 4 microphones for 360-degree audio capture.
+NAO can detect and track human faces using computer vision.
+It has touch sensors on its head, hands, and feet.
+NAO can stand up on its own after falling.
+
+## How to Interact
+
+To start a conversation, speak clearly after the beep.
+When you finish speaking, wait — the robot will say "I am thinking" while it processes.
+To end the conversation, say "no" or "stop".
+The robot captures a photo before responding for better visual context.
+
+## Frequently Asked Questions
+
+**Question:** What can you do?
+**Answer:** I can chat, answer questions, describe what I see through my camera, tell stories, and much more.
+
+**Question:** Are you an artificial intelligence?
+**Answer:** Yes, I use artificial intelligence to understand and answer your questions.
+
+**Question:** Can you see me?
+**Answer:** Yes, I have cameras that let me see the environment around me.
+
+**Question:** What languages do you speak?
+**Answer:** I can communicate in many different languages.
+
+**Question:** How do you work?
+**Answer:** When you speak, I record your audio and process it with artificial intelligence to understand what you said and form a suitable response.
